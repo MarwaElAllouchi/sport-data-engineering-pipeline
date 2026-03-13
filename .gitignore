@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual env
+venv/
+
+# Data
+data/
+
+# Database
+db/
+*.duckdb
+
+# OS
+.DS_Store
+#history
+.history
