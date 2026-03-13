@@ -7,7 +7,10 @@ import io
 import unicodedata
 import pandas as pd
 import boto3
+from utils.utils_cleaning import ensure_parent_dir 
 from utils.utils_logger import setup_logger
+
+
 logger = setup_logger("Calcul_prime_sportive")
 from config import (
     BUCKET,
@@ -88,6 +91,8 @@ df["prime_sport"] = df.apply(
 )
 
 # 7️⃣ Sauvegarde
+ensure_parent_dir(LOCAL_FINANCIALS_FILE)
+
 df.to_csv(LOCAL_FINANCIALS_FILE, index=False)
 
 s3.upload_file(

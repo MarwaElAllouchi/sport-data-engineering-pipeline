@@ -6,8 +6,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import duckdb
 from utils.utils_logger import setup_logger
 from config import DUCKDB_FILE
+from utils.utils_cleaning import ensure_parent_dir
 
 logger = setup_logger("create_duckdb_analytics_views")
+# Créer les dossiers nécessaires
+ensure_parent_dir(DUCKDB_FILE)
+os.makedirs("data/powerbi", exist_ok=True)
 
 con = duckdb.connect(DUCKDB_FILE)
 

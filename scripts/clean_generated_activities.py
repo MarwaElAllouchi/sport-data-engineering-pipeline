@@ -1,7 +1,7 @@
 import io
 import pandas as pd
 import boto3
-from utils.utils_cleaning import clean_columns, remove_duplicates, split_clean_rejects, standardize_text
+from utils.utils_cleaning import ensure_parent_dir,clean_columns, remove_duplicates, split_clean_rejects, standardize_text
 
 from config import (RH_KEY ,
                      BUCKET ,ACTIVITIES_RAW_KEY,
@@ -100,6 +100,9 @@ if not rejects.empty:
     rejects["date_fin"] = rejects["date_fin"].astype(str)
 
 # 10) Sauvegarde locale
+ensure_parent_dir(OUTPUT_CLEAN_LOCAL)
+ensure_parent_dir(OUTPUT_REJECTS_LOCAL)
+
 clean.to_csv(OUTPUT_CLEAN_LOCAL, index=False)
 rejects.to_csv(OUTPUT_REJECTS_LOCAL, index=False)
 

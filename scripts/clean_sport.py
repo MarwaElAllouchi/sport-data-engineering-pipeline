@@ -6,7 +6,7 @@ import io
 import pandas as pd
 import boto3
 from utils.utils_logger import setup_logger
-from utils.utils_cleaning import clean_columns, remove_duplicates, standardize_text, split_clean_rejects
+from utils.utils_cleaning import ensure_parent_dir,clean_columns, remove_duplicates, standardize_text, split_clean_rejects
 from config import KEY_SPORT,BUCKET , AWS_REGION,LOCAL_SPORT_CLEAN,LOCAL_SPORT_REJECTS_FILE,SPORT_DECLARATIF_KEY,SPORT_KEY_REJECTS
 logger = setup_logger("Nettoyage_Sport")
 
@@ -41,6 +41,9 @@ if "pratique_dun_sport" in df.columns:
 reject_mask = df["id_salarie"].isna()
 
 clean, rejects = split_clean_rejects(df, reject_mask)
+
+ensure_parent_dir(LOCAL_SPORT_CLEAN)
+ensure_parent_dir(LOCAL_SPORT_REJECTS_FILE)
 
 clean.to_csv(LOCAL_SPORT_CLEAN, index=False)
 rejects.to_csv(LOCAL_SPORT_REJECTS_FILE, index=False)

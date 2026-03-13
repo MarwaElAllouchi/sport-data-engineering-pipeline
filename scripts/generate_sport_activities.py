@@ -9,6 +9,7 @@ import pandas as pd
 import boto3
 from faker import Faker
 from utils.utils_logger import setup_logger
+from utils.utils_cleaning import ensure_parent_dir
 
 
 from config import (
@@ -88,6 +89,7 @@ for emp_id in employee_ids:
 activities_df = pd.DataFrame(activities)
 
 # 6) Sauvegarde locale
+ensure_parent_dir(OUTPUT_LOCAL)
 activities_df.to_csv(OUTPUT_LOCAL, index=False)
 
 # 7) Upload vers S3

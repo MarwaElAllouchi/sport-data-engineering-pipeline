@@ -1,6 +1,7 @@
 import pandas as pd
 import unicodedata
 import re
+import os
 
 
 def normalize_column_name(col):
@@ -44,3 +45,6 @@ def split_clean_rejects(df, mask):
     clean = df[~mask]
     
     return clean, rejects
+
+def ensure_parent_dir(filepath):
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
