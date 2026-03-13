@@ -1,0 +1,131 @@
+id: sport_data_pipeline
+namespace: poc.etl.sportives
+
+description: >
+  Pipeline POC Avantages Sportifs :
+  ingestion, nettoyage, génération d'activités,
+  validation trajet, calcul financier, chargement DuckDB et tests qualité.
+
+pluginDefaults:
+  - type: io.kestra.plugin.scripts.python.Script
+    values:
+      beforeCommands:
+        - pip install -r requirements.txt
+      containerImage: python:3.13-slim
+
+tasks:
+  - id: clean_rh
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python scripts/clean_rh.py
+    retry:
+      type: constant
+      interval: PT30S
+      maxAttempts: 2
+
+  - id: test_rh
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python tests/test_rh.py
+
+  - id: clean_sportive
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python scripts/clean_sportive.py
+    retry:
+      type: constant
+      interval: PT30S
+      maxAttempts: 2
+
+  - id: generate_sport_activities
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python scripts/generate_sport_activities.py
+    retry:
+      type: constant
+      interval: PT30S
+      maxAttempts: 2
+
+  - id: clean_generated_activities
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python scripts/clean_generated_activities.py
+    retry:
+      type: constant
+      interval: PT30S
+      maxAttempts: 2
+
+  - id: test_activities
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python tests/test_activities.py
+
+  - id: build_employee_sport_summary
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python scripts/build_employee_sport_summary.py
+    retry:
+      type: constant
+      interval: PT30S
+      maxAttempts: 2
+
+  - id: test_summary
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python tests/test_summary.py
+
+  - id: validate_commute_distance
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python scripts/validate_commute_distance.py
+    retry:
+      type: constant
+      interval: PT30S
+      maxAttempts: 2
+
+  - id: test_commute
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python tests/test_commute.py
+
+  - id: compute_financial_impact
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python scripts/compute_financial_impact.py
+    retry:
+      type: constant
+      interval: PT30S
+      maxAttempts: 2
+
+  - id: test_financials
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python tests/test_financials.py
+
+  - id: load_to_duckdb
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python scripts/load_to_duckdb.py
+    retry:
+      type: constant
+      interval: PT30S
+      maxAttempts: 2
+      
+  - id: create_duckdb_analytics_views
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      python scripts/create_duckdb_analytics_views.py
+    retry:
+      type: constant
+      interval: PT30S
+      maxAttempts: 2
+
+errors:
+  - id: pipeline_failed_log
+    type: io.kestra.plugin.core.log.Log
+    message: "Le pipeline sport_data_pipeline a échoué. Vérifier les logs Kestra."
+
+afterExecution:
+  - id: final_status
+    type: io.kestra.plugin.core.log.Log
+    message: "Execution terminée avec le statut {{ execution.state.current }}."
