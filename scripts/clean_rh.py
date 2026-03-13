@@ -42,7 +42,7 @@ ensure_parent_dir(LOCAL_RH_REJECTS_FILE)
 clean.to_csv(LOCAL_RH_CLEAN, index=False)
 rejects.to_csv(LOCAL_RH_REJECTS_FILE, index=False)
 
-s3.upload_file(LOCAL_RH_CLEAN, BUCKET, RH_KEY)
+s3.upload_file(RH_KEY, BUCKET, RH_KEY)
 s3.upload_file(RH_KEY_REJECTS, BUCKET, RH_KEY_REJECTS)
 
 logger.info("✅ RH nettoyé")
