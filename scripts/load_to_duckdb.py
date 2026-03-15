@@ -7,7 +7,8 @@ import io
 import duckdb
 import pandas as pd
 import boto3
-from utils.utils_logger import setup_logger
+from utils.utils_logger import setup_logger 
+from utils.utils_cleaning import ensure_parent_dir
 
 logger = setup_logger("load_to_duckdb")
 
@@ -31,6 +32,7 @@ financials_obj = s3.get_object(Bucket=BUCKET, Key=FINANCIALS_KEY)
 financials_df = pd.read_csv(io.BytesIO(financials_obj["Body"].read()))
 
 # 2) Connexion DuckDB
+ensure_parent_dir(DUCKDB_FILE)
 con = duckdb.connect(DUCKDB_FILE)
 
 # 3) Recréer les tables
