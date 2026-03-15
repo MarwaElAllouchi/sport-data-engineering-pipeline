@@ -52,5 +52,5 @@ s3.upload_file(LOCAL_SPORT_CLEAN, BUCKET, SPORT_DECLARATIF_KEY)
 s3.upload_file(LOCAL_SPORT_REJECTS_FILE, BUCKET, SPORT_KEY_REJECTS)
 
 print("✅ Sport déclaratif nettoyé")
-print("Lignes propres :", len(clean))
-print("Lignes rejetées :", len(rejects))
+print(f"Lignes propres : {len(clean)}")
+print(f"Lignes rejetées : {len(rejects)}")
