@@ -19,7 +19,7 @@ OUTPUT_REJECTS_LOCAL = LOCAL_ACTIVITIES_REJECTS_FILE
 
 OUTPUT_CLEAN_S3 = ACTIVITIES_CLEAN_KEY
  
-s3 = boto3.client("s3", region_name="AWS_REGION")
+s3 = boto3.client("s3", region_name="eu-west-3")
 
 # 1) Lire activités générées
 obj_activities = s3.get_object(Bucket=BUCKET, Key=ACTIVITIES_KEY)
