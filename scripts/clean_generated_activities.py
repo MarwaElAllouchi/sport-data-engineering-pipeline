@@ -7,7 +7,7 @@ import pandas as pd
 import boto3
 from utils.utils_cleaning import ensure_parent_dir,clean_columns, remove_duplicates, split_clean_rejects, standardize_text
 
-from config import (RH_KEY ,AWS_REGION,
+from config import (RH_KEY ,
                      BUCKET ,ACTIVITIES_RAW_KEY,
                      ACTIVITIES_CLEAN_KEY,
                      LOCAL_ACTIVITIES_CLEAN_FILE,
