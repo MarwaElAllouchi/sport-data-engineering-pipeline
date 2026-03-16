@@ -1,131 +1,153 @@
 id: sport_data_pipeline
 namespace: poc.etl.sportives
 
-description: >
-  Pipeline POC Avantages Sportifs :
-  ingestion, nettoyage, génération d'activités,
-  validation trajet, calcul financier, chargement DuckDB et tests qualité.
+description: |
+  Pipeline POC Avantages Sportifs.
+  Structure fail-fast : 1 script -> 1 test.
+  Dépendances intégrées dans l'image sport-pipeline:latest.
+
+triggers:
+  - id: monthly_schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "@monthly"
+    disabled: true
 
 pluginDefaults:
-  - type: io.kestra.plugin.scripts.python.Script
+  - type: io.kestra.plugin.scripts.python.Commands
     values:
-      beforeCommands:
-        - pip install -r requirements.txt
-      containerImage: python:3.13-slim
+      taskRunner:
+        type: io.kestra.plugin.scripts.runner.docker.Docker
+      containerImage: sport-pipeline:latest
+      env:
+        AWS_ACCESS_KEY_ID: "{{ secret('AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ secret('AWS_ACCESS_KEY') }}"
+        AWS_DEFAULT_REGION: "{{ secret('AWS_DEFAULT_REGION') }}"
+        AWS_REGION: "{{ secret('AWS_DEFAULT_REGION') }}"
 
 tasks:
-  - id: clean_rh
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python scripts/clean_rh.py
-    retry:
-      type: constant
-      interval: PT30S
-      maxAttempts: 2
+  - id: processing_zone
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
 
-  - id: test_rh
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python tests/test_rh.py
+      # 1) Récupération du code à la racine du Working Directory
+      - id: git_clone
+        type: io.kestra.plugin.git.Clone
+        url: https://github.com/MarwaElAllouchi/sport-data-engineering-pipeline
+        branch: main
+        retry:
+          type: constant
+          maxAttempts: 3
+          interval: PT30S
 
-  - id: clean_sportive
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python scripts/clean_sportive.py
-    retry:
-      type: constant
-      interval: PT30S
-      maxAttempts: 2
+      # 2) Nettoyage RH
+      - id: clean_rh
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/clean_rh.py
 
-  - id: generate_sport_activities
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python scripts/generate_sport_activities.py
-    retry:
-      type: constant
-      interval: PT30S
-      maxAttempts: 2
+      - id: test_rh
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python tests/test_rh.py
 
-  - id: clean_generated_activities
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python scripts/clean_generated_activities.py
-    retry:
-      type: constant
-      interval: PT30S
-      maxAttempts: 2
+      # 3) Nettoyage sport déclaratif
+      - id: clean_sportive
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/clean_sport.py
 
-  - id: test_activities
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python tests/test_activities.py
+      # 4) Génération activités sportives
+      - id: generate_sport_activities
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/generate_sport_activities.py
 
-  - id: build_employee_sport_summary
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python scripts/build_employee_sport_summary.py
-    retry:
-      type: constant
-      interval: PT30S
-      maxAttempts: 2
+      # 5) Nettoyage activités générées
+      - id: clean_generated_activities
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/clean_generated_activities.py
 
-  - id: test_summary
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python tests/test_summary.py
+      - id: test_activities
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python tests/test_activities.py
 
-  - id: validate_commute_distance
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python scripts/validate_commute_distance.py
-    retry:
-      type: constant
-      interval: PT30S
-      maxAttempts: 2
+      # 6) Construction du résumé salarié
+      - id: build_employee_sport_summary
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/build_employee_sport_summary.py
 
-  - id: test_commute
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python tests/test_commute.py
+      - id: test_summary
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python tests/test_summary.py
 
-  - id: compute_financial_impact
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python scripts/compute_financial_impact.py
-    retry:
-      type: constant
-      interval: PT30S
-      maxAttempts: 2
+      # 7) Validation des trajets
+      - id: validate_commute_distance
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/validate_commute_distance.py
 
-  - id: test_financials
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python tests/test_financials.py
+      - id: test_commute
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python tests/test_commute.py
 
-  - id: load_to_duckdb
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python scripts/load_to_duckdb.py
-    retry:
-      type: constant
-      interval: PT30S
-      maxAttempts: 2
-      
-  - id: create_duckdb_analytics_views
-    type: io.kestra.plugin.scripts.python.Script
-    script: |
-      python scripts/create_duckdb_analytics_views.py
-    retry:
-      type: constant
-      interval: PT30S
-      maxAttempts: 2
+      # 8) Calcul financier
+      - id: compute_financial_impact
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/compute_financial_impact.py
 
+      - id: test_financials
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python tests/test_financials.py
+
+      # 9) Chargement DuckDB
+      - id: load_to_duckdb
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/load_to_duckdb.py
+
+      # 10) Création des vues analytiques Power BI
+      - id: create_duckdb_analytics_views
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/create_duckdb_analytics_views.py
+        outputFiles:
+          - "powerbi_*.csv"
+          - "*.duckdb"
+      # 11. RÉCUPÉRATION DES OUTPUTS
+      - id: get_outputs
+        type: io.kestra.plugin.core.storage.LocalFiles
+        outputs:
+          - exports/powerbi_*.csv
+          - exports/*.duckdb
+# --- GESTION DES ERREURS ---
 errors:
-  - id: pipeline_failed_log
+  - id: alert_on_failure
     type: io.kestra.plugin.core.log.Log
-    message: "Le pipeline sport_data_pipeline a échoué. Vérifier les logs Kestra."
+    message: "❌ ALERTE : Le pipeline s'est arrêté à l'étape {{ task.id }}."
 
-afterExecution:
-  - id: final_status
-    type: io.kestra.plugin.core.log.Log
-    message: "Execution terminée avec le statut {{ execution.state.current }}."
+  - id: send_test_email
+    type: io.kestra.plugin.googleworkspace.mail.Send
+    clientId: "{{ secret('GMAIL_CLIENT_ID') }}"
+    clientSecret: "{{ secret('GMAIL_CLIENT_SECRET') }}"
+    refreshToken: "{{ secret('GMAIL_REFRESH_TOKEN') }}"
+    to:
+      - "{{ secret('MAIL_ALERT') }}"
+    subject: "🚨 Alerte Pipeline - {{ execution.id }}"
+    htmlBody: |
+      <h2>🚨 Échec du Pipeline Sportive</h2>
+      <p>L'exécution a échoué.</p>
+      <ul>
+        <li><b>ID :</b> {{ execution.id }}</li>
+        <li><b>Étape fautive :</b> {{ task.id }}</li>
+        <li><b>Date :</b> {{ now() | date("dd/MM/yyyy HH:mm:ss") }}</li>
+      </ul>
+      <p>Vérifiez les logs dans l'interface Kestra.</p>
+      <p>Merci,</p>
+      <p>L’équipe Data Engineering</p>

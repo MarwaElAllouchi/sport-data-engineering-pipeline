@@ -7,7 +7,7 @@ import pandas as pd
 import boto3
 from utils.utils_cleaning import ensure_parent_dir,clean_columns, remove_duplicates, split_clean_rejects, standardize_text
 
-from config import (RH_KEY ,
+from config import (RH_KEY ,AWS_REGION,
                      BUCKET ,ACTIVITIES_RAW_KEY,
                      ACTIVITIES_CLEAN_KEY,
                      LOCAL_ACTIVITIES_CLEAN_FILE,
@@ -19,7 +19,7 @@ OUTPUT_REJECTS_LOCAL = LOCAL_ACTIVITIES_REJECTS_FILE
 
 OUTPUT_CLEAN_S3 = ACTIVITIES_CLEAN_KEY
  
-s3 = boto3.client("s3", region_name="eu-west-3")
+s3 = boto3.client("s3", region_name="AWS_REGION")
 
 # 1) Lire activités générées
 obj_activities = s3.get_object(Bucket=BUCKET, Key=ACTIVITIES_KEY)
