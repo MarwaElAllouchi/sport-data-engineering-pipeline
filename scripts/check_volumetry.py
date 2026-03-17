@@ -5,26 +5,23 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import glob
 import json
-import os
 import pandas as pd
 from utils.utils_logger import setup_logger
-from  config import DUCKDB_FILE
+from config import DUCKDB_FILE
 
 EXPORT_DIR = "data/powerbi/"
-EXPORT_DIR_file_db= DUCKDB_FILE 
-
 MIN_TOTAL_ROWS = 1
+
 logger = setup_logger("check_volumetrie")
-print(f"ddddddddddddddduck db {EXPORT_DIR_file_db}")
+logger.info(f"Chemin DuckDB attendu : {DUCKDB_FILE}")
 
 csv_files = glob.glob(os.path.join(EXPORT_DIR, "powerbi_*.csv"))
-duckdb_files = glob.glob(os.path.join(EXPORT_DIR_file_db, "*.duckdb"))
 
 if not csv_files:
-    raise ValueError("Aucun fichier CSV Power BI n'a été généré dans exports/")
+    raise ValueError(f"Aucun fichier CSV Power BI n'a été généré dans {EXPORT_DIR}")
 
-if not duckdb_files:
-    raise ValueError("Aucun fichier DuckDB n'a été généré dans exports/")
+if not os.path.exists(DUCKDB_FILE):
+    raise ValueError(f"Aucun fichier DuckDB n'a été généré : {DUCKDB_FILE}")
 
 total_rows = 0
 file_details = []
@@ -40,7 +37,8 @@ for file_path in csv_files:
 
 report = {
     "csv_file_count": len(csv_files),
-    "duckdb_file_count": len(duckdb_files),
+    "duckdb_file_count": 1,
+    "duckdb_file": DUCKDB_FILE,
     "total_rows": total_rows,
     "files": file_details,
     "status": "SUCCESS" if total_rows >= MIN_TOTAL_ROWS else "FAILED"
