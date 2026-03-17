@@ -27,6 +27,10 @@ pluginDefaults:
 tasks:
   - id: processing_zone
     type: io.kestra.plugin.core.flow.WorkingDirectory
+    outputFiles:
+      - "data/powerbi/powerbi_*.csv"
+      - "data/**/*.duckdb"
+      - "volumetry_report.json"
     tasks:
 
       # 1) Récupération du code à la racine du Working Directory
@@ -111,24 +115,19 @@ tasks:
         type: io.kestra.plugin.scripts.python.Commands
         commands:
           - python scripts/load_to_duckdb.py
-        outputFiles:
-          - "data/**/*.duckdb"
+
       # 10) Création des vues analytiques Power BI
       - id: create_duckdb_analytics_views
         type: io.kestra.plugin.scripts.python.Commands
         commands:
           - python scripts/create_duckdb_analytics_views.py
-        outputFiles:
-          - "data/powerbi/powerbi_*.csv"
-          - "data/**/*.duckdb"
-      # 11. RÉCUPÉRATION DES OUTPUTS
-      - id: get_outputs
-        type: io.kestra.plugin.core.flow.WorkingDirectory
-        outputs:
-          - "data/powerbi/powerbi_*.csv"
-          - "data/**/*.duckdb"
-          - "volumetry_report.json"
-# --- GESTION DES ERREURS ---
+
+      # 11) Contrôle volumétrique
+      - id: check_volumetry
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/check_volumetry.py
+
 errors:
   - id: alert_on_failure
     type: io.kestra.plugin.core.log.Log
