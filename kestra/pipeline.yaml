@@ -111,21 +111,23 @@ tasks:
         type: io.kestra.plugin.scripts.python.Commands
         commands:
           - python scripts/load_to_duckdb.py
-
+        outputFiles:
+          - "data/**/*.duckdb"
       # 10) Création des vues analytiques Power BI
       - id: create_duckdb_analytics_views
         type: io.kestra.plugin.scripts.python.Commands
         commands:
           - python scripts/create_duckdb_analytics_views.py
         outputFiles:
-          - "powerbi_*.csv"
-          - "*.duckdb"
+          - "data/powerbi/powerbi_*.csv"
+          - "data/**/*.duckdb"
       # 11. RÉCUPÉRATION DES OUTPUTS
       - id: get_outputs
         type: io.kestra.plugin.core.storage.LocalFiles
         outputs:
-          - exports/powerbi_*.csv
-          - exports/*.duckdb
+          - "data/powerbi/powerbi_*.csv"
+          - "data/**/*.duckdb"
+          - "volumetry_report.json"
 # --- GESTION DES ERREURS ---
 errors:
   - id: alert_on_failure
