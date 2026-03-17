@@ -2,7 +2,9 @@
 
 AWS_REGION = "eu-west-3"
 BUCKET = "sport-data-lake"
-
+SLACK_ENABLED = True
+SLACK_MAX_MESSAGES = 2   # nombre max de messages envoyés
+SLACK_DEMO_MODE = True   # mode démo
 # Adresse entreprise
 COMPANY_ADDRESS = "1362 Av. des Platanes, 34970 Lattes, France"
 
