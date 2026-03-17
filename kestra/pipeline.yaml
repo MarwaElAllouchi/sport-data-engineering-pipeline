@@ -123,7 +123,7 @@ tasks:
           - "data/**/*.duckdb"
       # 11. RÉCUPÉRATION DES OUTPUTS
       - id: get_outputs
-        type: io.kestra.plugin.core.storage.LocalFiles
+        type: io.kestra.plugin.core.flow.WorkingDirectory
         outputs:
           - "data/powerbi/powerbi_*.csv"
           - "data/**/*.duckdb"
