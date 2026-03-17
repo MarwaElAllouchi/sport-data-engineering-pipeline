@@ -12,8 +12,10 @@ from  config import DUCKDB_FILE
 
 EXPORT_DIR = "data/powerbi/"
 EXPORT_DIR_file_db= DUCKDB_FILE 
+
 MIN_TOTAL_ROWS = 1
 logger = setup_logger("check_volumetrie")
+print(f"ddddddddddddddduck db {EXPORT_DIR_file_db}")
 
 csv_files = glob.glob(os.path.join(EXPORT_DIR, "powerbi_*.csv"))
 duckdb_files = glob.glob(os.path.join(EXPORT_DIR_file_db, "*.duckdb"))
