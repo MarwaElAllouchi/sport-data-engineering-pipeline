@@ -8,13 +8,15 @@ import json
 import os
 import pandas as pd
 from utils.utils_logger import setup_logger
+from  config import DUCKDB_FILE
 
 EXPORT_DIR = "data/powerbi/"
+EXPORT_DIR_file_db= DUCKDB_FILE 
 MIN_TOTAL_ROWS = 1
 logger = setup_logger("check_volumetrie")
 
 csv_files = glob.glob(os.path.join(EXPORT_DIR, "powerbi_*.csv"))
-duckdb_files = glob.glob(os.path.join(EXPORT_DIR, "*.duckdb"))
+duckdb_files = glob.glob(os.path.join(EXPORT_DIR_file_db, "*.duckdb"))
 
 if not csv_files:
     raise ValueError("Aucun fichier CSV Power BI n'a été généré dans exports/")
