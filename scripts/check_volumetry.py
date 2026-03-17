@@ -9,7 +9,7 @@ import os
 import pandas as pd
 from utils.utils_logger import setup_logger
 
-EXPORT_DIR = "exports"
+EXPORT_DIR = "data/powerbi/"
 MIN_TOTAL_ROWS = 1
 logger = setup_logger("check_volumetrie")
 
