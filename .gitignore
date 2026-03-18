@@ -16,3 +16,5 @@ db/
 .DS_Store
 #history
 .history
+#env
+.env
