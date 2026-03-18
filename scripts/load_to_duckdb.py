@@ -1,3 +1,4 @@
+#load_to_duckdb.py
 import sys
 import os
 

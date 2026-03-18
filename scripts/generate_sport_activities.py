@@ -1,3 +1,4 @@
+#generate_sport_activities.py
 import sys
 import os
 
@@ -14,7 +15,7 @@ from utils.utils_cleaning import ensure_parent_dir
 
 from config import (
 BUCKET ,LOCAL_ACTIVITIES_FILE,ACTIVITIES_RAW_KEY ,
-RH_KEY 
+RH_KEY ,AWS_REGION,RANDOM_SEED
 
 )
 logger = setup_logger("generation_activites_sportives")
@@ -22,8 +23,11 @@ OUTPUT_LOCAL = LOCAL_ACTIVITIES_FILE
 OUTPUT_S3_KEY = ACTIVITIES_RAW_KEY
 
 fake = Faker("fr_FR")
+random.seed(RANDOM_SEED)
+Faker.seed(RANDOM_SEED)
+fake.seed_instance(RANDOM_SEED)
 
-s3 = boto3.client("s3", region_name="eu-west-3")
+s3 = boto3.client("s3", region_name=AWS_REGION)
 
 # 1) Lire le fichier RH propre depuis S3
 obj = s3.get_object(Bucket=BUCKET, Key=RH_KEY)

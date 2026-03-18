@@ -23,6 +23,7 @@ pluginDefaults:
         AWS_SECRET_ACCESS_KEY: "{{ secret('AWS_ACCESS_KEY') }}"
         AWS_DEFAULT_REGION: "{{ secret('AWS_DEFAULT_REGION') }}"
         AWS_REGION: "{{ secret('AWS_DEFAULT_REGION') }}"
+        SLACK_WEBHOOK_URL: "{{ secret('SLACK_WEBHOOK_URL') }}"
 
 tasks:
   - id: processing_zone
@@ -76,8 +77,13 @@ tasks:
         type: io.kestra.plugin.scripts.python.Commands
         commands:
           - python tests/test_activities.py
-
       # 6) Construction du résumé salarié
+      - id: publish_slack_activities
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python scripts/publish_slack_activities.py
+
+      # 7) Construction du résumé salarié
       - id: build_employee_sport_summary
         type: io.kestra.plugin.scripts.python.Commands
         commands:
@@ -88,7 +94,7 @@ tasks:
         commands:
           - python tests/test_summary.py
 
-      # 7) Validation des trajets
+      # 8) Validation des trajets
       - id: validate_commute_distance
         type: io.kestra.plugin.scripts.python.Commands
         commands:
@@ -99,7 +105,7 @@ tasks:
         commands:
           - python tests/test_commute.py
 
-      # 8) Calcul financier
+      # 9) Calcul financier
       - id: compute_financial_impact
         type: io.kestra.plugin.scripts.python.Commands
         commands:
@@ -110,19 +116,22 @@ tasks:
         commands:
           - python tests/test_financials.py
 
-      # 9) Chargement DuckDB
+      # 10) Chargement DuckDB
       - id: load_to_duckdb
         type: io.kestra.plugin.scripts.python.Commands
         commands:
           - python scripts/load_to_duckdb.py
 
-      # 10) Création des vues analytiques Power BI
+      # 11) Création des vues analytiques Power BI
       - id: create_duckdb_analytics_views
         type: io.kestra.plugin.scripts.python.Commands
         commands:
           - python scripts/create_duckdb_analytics_views.py
-
-      # 11) Contrôle volumétrique
+      - id: test_analytics
+        type: io.kestra.plugin.scripts.python.Commands
+        commands:
+          - python tests/test_analytics.py
+      # 12) Contrôle volumétrique
       - id: check_volumetry
         type: io.kestra.plugin.scripts.python.Commands
         commands:

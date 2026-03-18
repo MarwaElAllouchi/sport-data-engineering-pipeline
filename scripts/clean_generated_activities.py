@@ -1,3 +1,4 @@
+#clean_generated_activities.py
 import sys
 import os
 

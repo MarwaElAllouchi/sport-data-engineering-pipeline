@@ -1,3 +1,4 @@
+#compute_financial_impact.py
 import sys
 import os
 
@@ -9,7 +10,7 @@ import pandas as pd
 import boto3
 from utils.utils_cleaning import ensure_parent_dir 
 from utils.utils_logger import setup_logger
-
+from datetime import datetime
 
 logger = setup_logger("Calcul_prime_sportive")
 from config import (
@@ -89,6 +90,8 @@ df["prime_sport"] = df.apply(
     lambda row: row["salaire_brut"] * PRIME_RATE if row["eligible_prime_sport"] == "oui" else 0,
     axis=1
 )
+execution_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+df["execution_date"] = execution_date
 
 # 7️⃣ Sauvegarde
 ensure_parent_dir(LOCAL_FINANCIALS_FILE)

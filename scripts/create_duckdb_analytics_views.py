@@ -1,3 +1,4 @@
+#create_duckdb_analytics_views.py
 import sys
 import os
 

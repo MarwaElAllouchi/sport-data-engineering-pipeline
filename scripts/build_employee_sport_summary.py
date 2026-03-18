@@ -1,4 +1,4 @@
-
+#build_employee_sport_summary.py
 import sys
 import os
 
@@ -7,8 +7,11 @@ import io
 import pandas as pd
 import boto3
 
-from config import (BUCKET, AWS_REGION,RH_KEY,SPORT_DECLARATIF_KEY,ACTIVITIES_CLEAN_KEY,SUMMARY_KEY,LOCAL_SUMMARY_FILE)
+from config import (BUCKET, AWS_REGION,RH_KEY,SPORT_DECLARATIF_KEY,
+                    ACTIVITIES_CLEAN_KEY,SUMMARY_KEY,LOCAL_SUMMARY_FILE,WELLBEING_ACTIVITY_THRESHOLD,WELLBEING_DAYS)
+
 from utils.utils_logger import setup_logger
+from utils.utils_cleaning import ensure_parent_dir
 
 ACTIVITIES_KEY = ACTIVITIES_CLEAN_KEY
 OUTPUT_LOCAL = LOCAL_SUMMARY_FILE
@@ -61,14 +64,15 @@ if "pratique_dun_sport" in summary_df.columns:
 
 # 7) Calcul éligibilité jours bien-être
 summary_df["eligible_bien_etre"] = summary_df["nb_activites_12_mois"].apply(
-    lambda x: "oui" if x >= 15 else "non"
+    lambda x: "oui" if x >= WELLBEING_ACTIVITY_THRESHOLD else "non"
 )
 
 summary_df["jours_bien_etre"] = summary_df["nb_activites_12_mois"].apply(
-    lambda x: 5 if x >= 15 else 0
+    lambda x: WELLBEING_DAYS if x >= WELLBEING_ACTIVITY_THRESHOLD else 0
 )
 
 # 8) Sauvegarde locale
+ensure_parent_dir(OUTPUT_LOCAL)
 summary_df.to_csv(OUTPUT_LOCAL, index=False)
 
 # 9) Upload S3
